@@ -7,17 +7,39 @@
       Add task</button
     ><br /><input type="checkbox" v-model="isChecked" />Urgent
     <li
-      v-for="(task, index) in tasks"
+      v-for="(task, index) in filterTasks"
       :key="index"
       :class="[task.urgent === true ? 'urgent' : '']"
     >
       {{ task.text }}
       <span class="close-btn" @click="removeTask(task)">&#x2716;</span>
     </li>
-    <button class="showUrgent-btn" @click="showUrgent">
+    <p v-show="emptyList">You have no tasks left to do today!</p>
+    <p v-show="!emptyList && emptyUrgentList">
+      You currently have no <span style="color: red">urgent</span> tasks to
+      handle
+    </p>
+    <p v-show="!emptyList && emptyNonUrgentList">
+      You currently have no non-urgent tasks to handle
+    </p>
+    <button
+      class="showUrgent-btn"
+      @click="toggleUrgent"
+      v-if="this.showOnlyUrgent"
+    >
+      Show only non-urgent tasks
+    </button>
+    <button class="showUrgent-btn" @click="toggleUrgent" v-else>
       Show only urgent tasks
     </button>
     <br />
+    <button
+      class="showAll-btn"
+      @click="showAllTasks"
+      v-show="this.showOnlyUrgent || this.showOnlyUrgent === false"
+    >
+      Show all tasks
+    </button>
   </ul>
 </template>
 
@@ -45,7 +67,32 @@ export default {
         urgent: false,
       },
       isChecked: false,
+      showOnlyUrgent: null,
     };
+  },
+  computed: {
+    filterTasks() {
+      if (this.showOnlyUrgent) {
+        return this.tasks.filter((item) => item.urgent === true);
+      } else if (this.showOnlyUrgent === null) {
+        return this.tasks;
+      } else {
+        return this.tasks.filter((item) => item.urgent === false);
+      }
+    },
+    emptyList() {
+      return this.tasks.length === 0 ? true : false;
+    },
+    emptyUrgentList() {
+      const urgentList = this.tasks.filter((item) => item.urgent === true);
+      return this.showOnlyUrgent && urgentList.length === 0 ? true : false;
+    },
+    emptyNonUrgentList() {
+      const nonurgentList = this.tasks.filter((item) => item.urgent === false);
+      return this.showOnlyUrgent === false && nonurgentList.length === 0
+        ? true
+        : false;
+    },
   },
   methods: {
     addTask() {
@@ -59,13 +106,14 @@ export default {
         this.newTask.urgent = false;
       }
     },
-    removeTask(id) {
-      this.tasks = this.tasks.filter((element) => element !== id);
+    removeTask(task) {
+      this.tasks = this.tasks.filter((element) => element !== task);
     },
-    showUrgent() {
-      this.tasks = this.tasks.filter((element) => {
-        return element.urgent === true;
-      });
+    toggleUrgent() {
+      this.showOnlyUrgent = !this.showOnlyUrgent;
+    },
+    showAllTasks() {
+      this.showOnlyUrgent = null;
     },
   },
 };
@@ -74,7 +122,6 @@ export default {
 <style>
 * {
   font-family: "Roboto Mono", monospace;
-
   color: black;
 }
 
@@ -101,7 +148,8 @@ button {
   cursor: pointer;
 }
 
-.showUrgent-btn {
+.showUrgent-btn,
+.showAll-btn {
   margin-top: 10px;
 }
 
