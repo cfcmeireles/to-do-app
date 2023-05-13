@@ -5,7 +5,11 @@
       @click="addTask"
     >
       Add task</button
-    ><br /><input type="checkbox" v-model="isChecked" />Urgent
+    ><br /><input
+      class="urgent-checkbox"
+      type="checkbox"
+      v-model="isChecked"
+    />Urgent
     <li
       v-for="(task, index) in filterTasks"
       :key="index"
@@ -23,20 +27,24 @@
       You currently have no non-urgent tasks to handle
     </p>
     <button
-      class="showUrgent-btn"
       @click="toggleUrgent"
       v-if="this.showOnlyUrgent"
+      :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
     >
       Show only non-urgent tasks
     </button>
-    <button class="showUrgent-btn" @click="toggleUrgent" v-else>
+    <button
+      @click="toggleUrgent"
+      v-else
+      :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
+    >
       Show only urgent tasks
     </button>
     <br />
     <button
-      class="showAll-btn"
       @click="showAllTasks"
       v-show="this.showOnlyUrgent || this.showOnlyUrgent === false"
+      :class="[emptyList ? 'showAll-btn-inactive' : 'showAll-btn']"
     >
       Show all tasks
     </button>
@@ -73,22 +81,22 @@ export default {
   computed: {
     filterTasks() {
       if (this.showOnlyUrgent) {
-        return this.tasks.filter((item) => item.urgent === true);
+        return this.tasks.filter((item) => item.urgent);
       } else if (this.showOnlyUrgent === null) {
         return this.tasks;
       } else {
-        return this.tasks.filter((item) => item.urgent === false);
+        return this.tasks.filter((item) => !item.urgent);
       }
     },
     emptyList() {
       return this.tasks.length === 0 ? true : false;
     },
     emptyUrgentList() {
-      const urgentList = this.tasks.filter((item) => item.urgent === true);
+      const urgentList = this.tasks.filter((item) => item.urgent);
       return this.showOnlyUrgent && urgentList.length === 0 ? true : false;
     },
     emptyNonUrgentList() {
-      const nonurgentList = this.tasks.filter((item) => item.urgent === false);
+      const nonurgentList = this.tasks.filter((item) => !item.urgent);
       return this.showOnlyUrgent === false && nonurgentList.length === 0
         ? true
         : false;
@@ -148,9 +156,18 @@ button {
   cursor: pointer;
 }
 
-.showUrgent-btn,
+.urgent-checkbox {
+  margin-top: 10px;
+}
+
+.toggleUrgent-btn,
 .showAll-btn {
   margin-top: 10px;
+}
+
+.showAll-btn-inactive,
+.toggleUrgent-btn-inactive {
+  display: none;
 }
 
 .urgent {
