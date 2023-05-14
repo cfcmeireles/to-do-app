@@ -28,18 +28,19 @@
     </p>
     <button
       @click="toggleUrgent"
-      v-if="this.showOnlyUrgent"
-      :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
-    >
-      Show only non-urgent tasks
-    </button>
-    <button
-      @click="toggleUrgent"
-      v-else
+      v-show="!this.showOnlyUrgent && urgentList && nonUrgentList"
       :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
     >
       Show only urgent tasks
     </button>
+    <button
+      @click="toggleUrgent"
+      v-show="this.showOnlyUrgent"
+      :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
+    >
+      Show only non-urgent tasks
+    </button>
+
     <br />
     <button
       @click="showAllTasks"
@@ -100,6 +101,14 @@ export default {
       return this.showOnlyUrgent === false && nonurgentList.length === 0
         ? true
         : false;
+    },
+    urgentList() {
+      const urgentList = this.tasks.filter((item) => item.urgent);
+      return urgentList.length >= 1 ? true : false;
+    },
+    nonUrgentList() {
+      const nonUrgentList = this.tasks.filter((item) => !item.urgent);
+      return nonUrgentList.length >= 1 ? true : false;
     },
   },
   methods: {
