@@ -18,24 +18,24 @@
       {{ task.text }}
       <span class="close-btn" @click="removeTask(task)">&#x2716;</span>
     </li>
-    <p v-show="emptyList">You have no tasks left to do today!</p>
-    <p v-show="!emptyList && emptyUrgentList">
+    <p v-if="emptyList">You have no tasks left to do today!</p>
+    <p v-if="!emptyList && emptyUrgentList">
       You currently have no <span style="color: red">urgent</span> tasks to
       handle
     </p>
-    <p v-show="!emptyList && emptyNonUrgentList">
+    <p v-if="!emptyList && emptyNonUrgentList">
       You currently have no non-urgent tasks to handle
     </p>
     <button
       @click="toggleUrgent"
-      v-show="!this.showOnlyUrgent && urgentList && nonUrgentList"
+      v-if="!this.showOnlyUrgent && urgentList && nonUrgentList"
       :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
     >
       Show only urgent tasks
     </button>
     <button
       @click="toggleUrgent"
-      v-show="this.showOnlyUrgent"
+      v-if="this.showOnlyUrgent"
       :class="[emptyList ? 'toggleUrgent-btn-inactive' : 'toggleUrgent-btn']"
     >
       Show only non-urgent tasks
@@ -44,7 +44,7 @@
     <br />
     <button
       @click="showAllTasks"
-      v-show="this.showOnlyUrgent || this.showOnlyUrgent === false"
+      v-if="this.showOnlyUrgent || this.showOnlyUrgent === false"
       :class="[emptyList ? 'showAll-btn-inactive' : 'showAll-btn']"
     >
       Show all tasks
@@ -90,25 +90,23 @@ export default {
       }
     },
     emptyList() {
-      return this.tasks.length === 0 ? true : false;
+      return this.tasks.length === 0;
     },
     emptyUrgentList() {
       const urgentList = this.tasks.filter((item) => item.urgent);
-      return this.showOnlyUrgent && urgentList.length === 0 ? true : false;
+      return this.showOnlyUrgent && urgentList.length === 0;
     },
     emptyNonUrgentList() {
       const nonurgentList = this.tasks.filter((item) => !item.urgent);
-      return this.showOnlyUrgent === false && nonurgentList.length === 0
-        ? true
-        : false;
+      return this.showOnlyUrgent === false && nonurgentList.length === 0;
     },
     urgentList() {
       const urgentList = this.tasks.filter((item) => item.urgent);
-      return urgentList.length >= 1 ? true : false;
+      return urgentList.length >= 1;
     },
     nonUrgentList() {
       const nonUrgentList = this.tasks.filter((item) => !item.urgent);
-      return nonUrgentList.length >= 1 ? true : false;
+      return nonUrgentList.length >= 1;
     },
   },
   methods: {
