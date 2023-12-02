@@ -1,7 +1,7 @@
 <template>
   <header>To do list:</header>
   <ul>
-    <input v-model="newTask.text" placeholder="Remind me to..." /><button
+    <input v-model="tasks.text" placeholder="Remind me to..." /><button
       @click="addTask"
     >
       Add task</button
@@ -11,14 +11,19 @@
       v-model="isChecked"
     />Urgent
     <li
-      v-for="(task, index) in filterTasks"
+      v-for="(tasks, index) in filterTasks"
       :key="index"
-      :class="[task.urgent === true ? 'urgent' : '']"
+      :class="[tasks.urgent === true ? 'urgent' : '']"
     >
-      {{ task.text }}
-      <span class="close-btn" @click="removeTask(task)">&#x2716;</span>
+      {{ tasks.text }}
+      <span
+        v-if="tasks.text !== ''"
+        class="close-btn"
+        @click="removeTask(tasks)"
+        >&#x2716;</span
+      >
     </li>
-    <p v-if="emptyList">You have no tasks left to do today!</p>
+    <p v-if="emptyList">Add some tasks to do today!</p>
     <p v-if="!emptyList && emptyUrgentList">
       You currently have no <span style="color: red">urgent</span> tasks to
       handle
@@ -59,25 +64,19 @@ export default {
     return {
       tasks: [
         {
-          text: "Grocery Shopping",
-          urgent: true,
-        },
-        {
-          text: "Take out the trash",
-          urgent: true,
-        },
-        {
-          text: "Car wash",
+          text: "",
           urgent: false,
         },
       ],
-      newTask: {
-        text: "",
-        urgent: false,
-      },
       isChecked: false,
       showOnlyUrgent: null,
     };
+  },
+  mounted() {
+    const tasksJSON = localStorage.getItem("tasks");
+    if (tasksJSON) {
+      this.tasks = JSON.parse(tasksJSON);
+    }
   },
   computed: {
     filterTasks() {
@@ -90,7 +89,7 @@ export default {
       }
     },
     emptyList() {
-      return this.tasks.length === 0;
+      return this.tasks.length === 1;
     },
     emptyUrgentList() {
       const urgentList = this.tasks.filter((item) => item.urgent);
@@ -111,18 +110,23 @@ export default {
   },
   methods: {
     addTask() {
-      if (this.newTask.text) {
+      if (this.tasks.text) {
         if (this.isChecked) {
-          this.newTask.urgent = true;
+          this.tasks.urgent = true;
         }
-        this.tasks.push({ ...this.newTask });
-        this.newTask.text = "";
+        this.tasks.push({
+          text: this.tasks.text,
+          urgent: this.tasks.urgent,
+        });
+        localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        this.tasks.text = "";
         this.isChecked = false;
-        this.newTask.urgent = false;
+        this.tasks.urgent = false;
       }
     },
-    removeTask(task) {
-      this.tasks = this.tasks.filter((element) => element !== task);
+    removeTask(taskToRemove) {
+      this.tasks = this.tasks.filter((element) => element !== taskToRemove);
+      localStorage.setItem("tasks", JSON.stringify(this.tasks));
     },
     toggleUrgent() {
       this.showOnlyUrgent = !this.showOnlyUrgent;
